@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio — Video Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       🎨 EASY CUSTOMIZATION — Edit the values in this section
+    ============================================================ */
+    :root {
+      /* Your name & tagline */
+      --your-name: "Viraj Sirohi";
+      --your-tagline: "Video Editor & Motion Designer";
+
+      /* Brand colors */
+      --accent: #ff6708;          /* Your highlight/accent color */
+      --bg: #0A0A0A;              /* Page background */
+      --surface: #111111;         /* Card background */
+      --surface2: #1A1A1A;        /* Secondary surface */
+      --text: #F0EDE8;            /* Main text */
+      --muted: #666666;           /* Muted text */
+      --border: #222222;          /* Border color */
+
+      /* Typography */
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+    /* ============================================================ */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(232, 255, 71, 0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.35s ease, width 0.3s ease, height 0.3s ease;
+      transform: translate(-50%, -50%);
+    }
+    body:has(a:hover) .cursor-ring,
+    body:has(button:hover) .cursor-ring { width: 56px; height: 56px; }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9990; opacity: 0.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s, background 0.3s, backdrop-filter 0.3s;
+    }
+    nav.scrolled {
+      border-color: var(--border);
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(20px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.75rem;
+      text-decoration: none;
+    }
+    /* ── LOGO IMAGE (replace placeholder with your logo) ── */
+    .logo-img {
+      width: 40px; height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      /* If no image, this placeholder shows */
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: #000;
+      overflow: hidden;
+    }
+    .logo-img img { width: 100%; height: 100%; object-fit: cover; }
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+      font-weight: 500;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 3rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 70% 30%, rgba(232,255,71,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 20% 80%, rgba(232,255,71,0.04) 0%, transparent 60%);
+    }
+    .hero-line {
+      position: absolute; top: 0; left: 3rem;
+      width: 1px; height: 40%;
+      background: linear-gradient(to bottom, transparent, var(--border), transparent);
+    }
+    .hero-reel-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 12vw, 10rem);
+      line-height: 0.9;
+      letter-spacing: -0.01em;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.5s forwards;
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-sub {
+      display: flex; align-items: center; gap: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.7s forwards;
+    }
+    .hero-sub p {
+      font-size: 1rem; color: var(--muted);
+      max-width: 360px; line-height: 1.7;
+    }
+    .hero-cta {
+      white-space: nowrap;
+      padding: 0.9rem 2rem;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-weight: 500;
+      border: none;
+      cursor: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(232,255,71,0.3); }
+    .hero-scroll {
+      position: absolute; bottom: 2rem; right: 3rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      font-family: var(--font-mono); font-size: 0.65rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+      opacity: 0; animation: fadeUp 0.8s 1s forwards;
+    }
+    .hero-scroll::before {
+      content: '';
+      display: block; width: 40px; height: 1px;
+      background: var(--muted);
+      animation: expandLine 1.5s 1.5s ease forwards;
+      transform: scaleX(0); transform-origin: left;
+    }
+    @keyframes expandLine { to { transform: scaleX(1); } }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 6rem 3rem; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      line-height: 1; margin-bottom: 3.5rem;
+    }
+    hr.divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 0 3rem;
+    }
+
+    /* ── WORK / VIDEO GRID ── */
+    #work { background: var(--bg); }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+      cursor: none;
+    }
+    .video-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+    .video-thumb {
+      position: relative;
+      padding-top: 56.25%;    /* 16:9 */
+      background: var(--surface2);
+      overflow: hidden;
+    }
+    .video-thumb iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; border: none;
+    }
+    /* Lazy-load cover overlay */
+    .video-cover {
+      position: absolute; inset: 0;
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: none;
+      transition: opacity 0.3s;
+      z-index: 2;
+    }
+    .video-cover.hidden { opacity: 0; pointer-events: none; }
+    .play-btn {
+      width: 60px; height: 60px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .video-card:hover .play-btn {
+      background: var(--accent);
+      transform: scale(1.1);
+    }
+    .play-btn svg { fill: var(--accent); margin-left: 4px; transition: fill 0.2s; }
+    .video-card:hover .play-btn svg { fill: #000; }
+    .video-info { padding: 1.25rem 1.5rem; }
+    .video-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+    .video-title { font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .video-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── ABOUT ── */
+    #about {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem; align-items: center;
+    }
+    .about-text p {
+      color: var(--muted); line-height: 1.85;
+      margin-bottom: 1.25rem; font-size: 0.95rem;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+    .about-text strong { color: var(--text); font-weight: 500; }
+    .skills-list {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      margin-top: 2rem;
+    }
+    .skill-tag {
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .about-stats { display: flex; flex-direction: column; gap: 2rem; }
+    .stat {
+      border-left: 2px solid var(--accent);
+      padding-left: 1.5rem;
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 3.5rem; line-height: 1;
+      color: var(--text);
+    }
+    .stat-label {
+      font-size: 0.8rem; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--bg); text-align: center; }
+    #contact .section-label { justify-content: center; display: flex; }
+    .contact-email {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 4rem);
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      display: inline-block;
+      position: relative;
+      transition: color 0.3s;
+    }
+    .contact-email::after {
+      content: '';
+      position: absolute; bottom: -6px; left: 0; right: 0; height: 2px;
+      background: var(--accent);
+      transform: scaleX(0); transition: transform 0.3s;
+    }
+    .contact-email:hover { color: var(--accent); }
+    .contact-email:hover::after { transform: scaleX(1); }
+    .social-links {
+      display: flex; justify-content: center; gap: 2rem;
+      margin-top: 3rem;
+    }
+    .social-link {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .social-link:hover { color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 3rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p { font-size: 0.75rem; color: var(--muted); font-family: var(--font-mono); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1.25rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 0 1.5rem 4rem; }
+      .hero-line { display: none; }
+      section { padding: 4rem 1.5rem; }
+      hr.divider { margin: 0 1.5rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ── NAV ── -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">
+      <!-- 
+        🖼️ TO ADD YOUR LOGO:
+        Replace the text "AR" below with an <img> tag pointing to your logo file.
+        Example: <img src="your-logo.png" alt="Logo" style="width:100%;height:100%;object-fit:cover;">
+      -->
+      <div class="logo-img"><img src="sushidesignslog.png" alt="Logo" style="width:100%;height:100%;object-fit:cover;"></div>
+      <span class="logo-text">SUSHIDESIGNS.CO</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-line"></div>
+    <div class="hero-reel-tag">✦ Available for freelance · 2026</div>
+    <h1 class="hero-title">
+      CRAFTING<br>
+      <span>STORIES</span><br>
+      FRAME BY<br>FRAME
+    </h1>
+    <div class="hero-sub">
+      <p>Video editor specializing in cinematic storytelling, brand films, and motion design that makes people feel something.</p>
+      <a href="#work" class="hero-cta">View My Work →</a>
+    </div>
+    <div class="hero-scroll">Scroll to explore</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════
+       🎬 YOUR VIDEOS — Edit this section!
+       
+       How to add a YouTube video (unlisted or public):
+       1. Get your YouTube video URL, e.g.: https://youtu.be/dQw4w9WgXcQ
+       2. Extract the video ID (the part after "youtu.be/" or "v=")
+          e.g. from "youtu.be/dQw4w9WgXcQ" → ID is "dQw4w9WgXcQ"
+       3. Copy one of the .video-card blocks below
+       4. Replace VIDEO_ID_HERE with your actual video ID
+       5. Update the title, tag, and description
+       
+       To REMOVE a video: delete the entire .video-card block
+       To ADD a video: copy a .video-card block and paste it
+  ══════════════════════════════════════════ -->
+  <section id="work">
+    <div class="section-label">Selected Work</div>
+    <h2 class="section-title">THE REEL</h2>
+
+    <div class="video-grid">
+
+      <!-- VIDEO CARD 1 — Edit me! -->
+      <div class="video-card">
+        <div class="video-thumb">
+          <div class="video-cover" onclick="loadVideo(this, 'uoaZ3e3uZu4')">
+            <div class="play-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <iframe id="frame-1" src="" allowfullscreen allow="autoplay"></iframe>
+        </div>
+        <div class="video-info">
+          <div class="video-tag">Corporate Event</div>
+          <div class="video-title">Corporate Event Coverage and Editing at Taj Delhi</div>
+          <div class="video-desc">This was a private event that took place in Taj Hotel, New Delhi</div>
+        </div>
+      </div>
+
+      <!-- VIDEO CARD 2 — Edit me! -->
+      <div class="video-card">
+        <div class="video-thumb">
+          <div class="video-cover" onclick="loadVideo(this, 'CB_8vfp201Q')">
+            <div class="play-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <iframe src="" allowfullscreen allow="autoplay"></iframe>
+        </div>
+        <div class="video-info">
+          <div class="video-tag">Logo Re-design</div>
+          <div class="video-title">Motion Graphics</div>
+          <div class="video-desc">Re-designed a logo for a college club</div>
+        </div>
+      </div>
+
+      <!-- VIDEO CARD 3 — Edit me! -->
+      <div class="video-card">
+        <div class="video-thumb">
+          <div class="video-cover" onclick="loadVideo(this, 'rF__IA_XkZQ')">
+            <div class="play-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <iframe src="" allowfullscreen allow="autoplay"></iframe>
+        </div>
+        <div class="video-info">
+          <div class="video-tag">Event reel</div>
+          <div class="video-title">College event coverage</div>
+          <div class="video-desc">Covered this event for a college club, establishing their online presence.</div>
+        </div>
+      </div>
+
+      <!-- VIDEO CARD 4 — Edit me! -->
+      <div class="video-card">
+        <div class="video-thumb">
+          <div class="video-cover" onclick="loadVideo(this, 'BKngbA3EiLw')">
+            <div class="play-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <iframe src="" allowfullscreen allow="autoplay"></iframe>
+        </div>
+        <div class="video-info">
+          <div class="video-tag">Commercial</div>
+          <div class="video-title">Cafe Commerical</div>
+          <div class="video-desc">Shot and edited a commerical for a cafe in Dalhousie, Himachal Pradesh.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════
+       👤 ABOUT — Edit this section!
+  ══════════════════════════════════════════ -->
+  <section id="about">
+    <div class="section-label">About Me</div>
+    <h2 class="section-title">THE EDITOR</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          Hi, I'm <strong>Viraj Sirohi</strong> — a video editor with a passion for 
+          <strong>cinematic storytelling</strong>. I turn raw footage into polished narratives 
+          that connect brands and audiences on an emotional level.
+        </p>
+        <p>
+          With 2+ years of experience across brand films, corporate events coverage 
+          and commercials, I bring a sharp editorial eye and meticulous attention to pacing, 
+          color, and sound design to every project.
+        </p>
+        <p>
+          Based in <strong>Delhi NCR, India</strong>. Open to remote collaborations worldwide.
+        </p>
+        <!-- 🏷️ SKILLS — Add or remove as needed -->
+        <div class="skills-list">
+          <span class="skill-tag">Premiere Pro</span>
+          <span class="skill-tag">After Effects</span>
+      
+          <span class="skill-tag">Color Grading</span>
+          <span class="skill-tag">Motion Graphics</span>
+        </div>
+      </div>
+
+      <!-- 📊 STATS — Change the numbers! -->
+      <div class="about-stats">
+        <div class="stat">
+          <div class="stat-num">10+</div>
+          <div class="stat-label">Projects Delivered</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">2</div>
+          <div class="stat-label">Years of Experience</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">10+</div>
+          <div class="stat-label">Happy Clients</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════
+       📬 CONTACT — Edit this section!
+  ══════════════════════════════════════════ -->
+  <section id="contact">
+    <div class="section-label">Get In Touch</div>
+    <h2 class="section-title">LET'S CREATE</h2>
+    <a href="mailto:sushidesigns52@gmail.com" class="contact-email">sushidesigns52@gmail.com</a>
+
+    <!-- 🔗 SOCIAL LINKS — Update your URLs -->
+    <div class="social-links">
+      <a href="https://www.instagram.com/sushidesigns.co?igsh=MXQ3OWVjcGV0Mnl2eA%3D%3D&utm_source=qr" class="social-link" target="_blank">Instagram</a>
+     <!-- <a href="https://youtube.com/@yourchannel" class="social-link" target="_blank">YouTube</a>
+      <a href="https://linkedin.com/in/yourprofile" class="social-link" target="_blank">LinkedIn</a>
+      <a href="https://vimeo.com/yourprofile" class="social-link" target="_blank">Vimeo</a>-->
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <p>© 2026 SUSHIDESIGNS.CO All rights reserved.</p>
+    <p>Crafted with love</p>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+      ring.style.left   = e.clientX + 'px';
+      ring.style.top    = e.clientY + 'px';
+    });
+
+    // Sticky nav
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Video lazy-load: click cover → load iframe
+    function loadVideo(coverEl, videoId) {
+      const iframe = coverEl.nextElementSibling;
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      coverEl.classList.add('hidden');
+    }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.video-card, .stat, .about-text').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(24px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
